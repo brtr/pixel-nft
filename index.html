@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pixel NFT</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.js" integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+    <script type="module" src="./src/main.js"></script>
+    <link href="./src/style.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <body>
+    <div id="root">
+      <h1 class="title">Pixel NFT</h1>
+      <div class="connect">
+        <button id="loginBtn">Connect Metamask</button>
+        <div id="login_address"></div>
+      </div>
+      <label id="uploadimage" for="pixlInput">Upload Image<input type="file" class="inputbtn" id="pixlInput"></label>
+      <div class="mt-5">
+        <button id="mintBtn">Mint</button>
+      </div>
+      <div class="result">
+        <canvas id="pixelitcanvas"></canvas>
+      </div>
+    </div>
+    <div id="loading">
+      <img src="./public/images/loading.gif" />
+    </div>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+#root {
+  margin: 10rem;
+}
+.connect {
+  float: right;
+}
+.result {
+  margin-top: 5rem;
+}
+.hide {
+  display: none;
+}
+.mt-5 {
+  margin-top: 5rem;
+}
+#loading {
+  z-index: 999;
+  background-color: #4c4945f7;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  text-align: center;
+  display: flex;
+}
+#loading img {
+  width: 400px;
+  height: 400px;
+  margin: auto;
+}
+#mintBtn {
+  display: inline-block;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: #000;
+  font-size: 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #000;
+  border-image: initial;
+  padding: 0.5625rem 1.25rem;
+  border-radius: 0.75rem;
+  transition: color 0.25s ease-in-out 0s, background-color 0.25s ease-in-out 0s, border-color 0.25s ease-in-out 0s;
+}
