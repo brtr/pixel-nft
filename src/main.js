@@ -3,11 +3,11 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
 (function() {
   let loginAddress = localStorage.getItem("loginAddress");
   let imagePath;
+  let blockSize = 0;
   const TargetChain = {
     id: "80001",
     name: "mumbai"
   };
-  const blockSize = 8;
   const palette = "[0,0,0]";
   const baseUrl = "https://gateway.pinata.cloud/ipfs/";
 
@@ -57,7 +57,6 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
     const newImg = c.toDataURL('image/png');
     const res = await fetch(newImg);
     const blob = await res.blob();
-    console.log('blob: ', blob);
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
 
     const data = new FormData();
@@ -110,12 +109,20 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
     checkChainId();
     toggleAddress();
     $("#loading").hide();
+    $(".pixelImg").remove();
+    $(".selectedBlock").hide();
 
     $("#loginBtn").on("click", function() {
       checkLogin();
     })
 
+    $("#uploadBtn").on("click", function() {
+      $("#pixlInput").click();
+    })
+
     $("#pixlInput").on("change", function() {
+      $(".pixelImg").remove();
+      $(".selectedBlock").hide();
       let img = new Image()
       const c = $("#pixelitcanvas")[0];
       const ctx = c.getContext('2d');
@@ -129,21 +136,40 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
 
         let pixelArr = ctx.getImageData(0, 0, w, h).data;
 
-        for (let y = 0; y < h; y += blockSize) {
-          for (let x = 0; x < w; x += blockSize) {
-            let p = (x + (y*w)) * 4;
-            ctx.fillStyle = "rgba(" + pixelArr[p] + "," + pixelArr[p + 1] + "," + pixelArr[p + 2] + "," + pixelArr[p + 3] + ")";
-            ctx.fillRect(x, y, blockSize, blockSize);
+        for (let z = 1; z < 4; z++) {
+          let size = 20 * z * 0.2;
+          for (let y = 0; y < h; y += size) {
+            for (let x = 0; x < w; x += size) {
+              let p = (x + (y*w)) * 4;
+              ctx.fillStyle = "rgba(" + pixelArr[p] + "," + pixelArr[p + 1] + "," + pixelArr[p + 2] + "," + pixelArr[p + 3] + ")";
+              ctx.fillRect(x, y, size, size);
+            }
           }
+
+          $("#pixelImgs").append(`<div class="pixelImg" data-size="${size}"><img src="${c.toDataURL('image/png')}" width="200" /></div>`);
         }
+
+        c.style.visibility = "hidden";
+        c.style.height = 0;
+
       };
 
       img.src = URL.createObjectURL($(this).prop("files")[0]);
     })
 
+    $("#root").on("click", ".pixelImg", function() {
+      blockSize = $(this).data("size");
+      $(".selectedBlock").show();
+      $("#selectedImg").attr("src", $(this).find("img").attr("src"));
+    })
+
     $("#mintBtn").on("click", function() {
-      $("#loading").show();
-      uploadImg();
+      if(blockSize == 0){
+        alert("You need select a pixel size first!");
+      } else {
+        $("#loading").show();
+        uploadImg();
+      }
     })
 
     // detect Metamask account change

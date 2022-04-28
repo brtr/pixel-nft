@@ -1,17 +1,22 @@
 #root {
-  margin: 10rem;
+  margin: 2rem 10rem;
 }
 .connect {
   float: right;
 }
-.result {
-  margin-top: 5rem;
+.pixelImg {
+  margin: 1rem;
+  display: inline-block;
+  cursor: pointer;
 }
 .hide {
   display: none;
 }
 .mt-5 {
   margin-top: 5rem;
+}
+.result {
+  text-align: center;
 }
 #loading {
   z-index: 999;
@@ -28,7 +33,7 @@
   height: 400px;
   margin: auto;
 }
-#mintBtn {
+#uploadBtn, #mintBtn {
   display: inline-block;
   font-weight: 500;
   line-height: 1.5;

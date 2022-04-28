@@ -16,13 +16,21 @@
         <button id="loginBtn">Connect Metamask</button>
         <div id="login_address"></div>
       </div>
-      <label id="uploadimage" for="pixlInput">Upload Image<input type="file" class="inputbtn" id="pixlInput"></label>
       <div class="mt-5">
+        <label for="pixlInput">
+          <input type="file" class="inputbtn hide" id="pixlInput">
+          <button id="uploadBtn">Upload</button>
+        </label>
         <button id="mintBtn">Mint</button>
       </div>
-      <div class="result">
-        <canvas id="pixelitcanvas"></canvas>
+      <div class="result mt-5">
+        <div class="selectedBlock">
+          <h2>Selected Pixel Size</h2>
+          <img id="selectedImg" width="300" />
+        </div>
+        <div id="pixelImgs"></div>
       </div>
+      <canvas id="pixelitcanvas"></canvas>
     </div>
     <div id="loading">
       <img src="./public/images/loading.gif" />
