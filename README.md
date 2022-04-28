@@ -5,9 +5,9 @@ To run this project locally, follow these steps.
 1. Clone the project locally, change into the directory, and install the dependencies:
 
 ```sh
-git clone https://github.com/brtr/techbay_cat.git
+git clone https://github.com/brtr/pixel-nft.git
 
-cd techbay_cat
+cd pixel-nft
 
 # install using NPM or Yarn
 npm install
