@@ -5,7 +5,9 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.slim.js" integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+    <script src="./src/slim.select.min.js"></script>
     <script type="module" src="./src/main.js"></script>
+    <link href="./src/slim.select.css" rel="stylesheet" type="text/css" />
     <link href="./src/style.css" rel="stylesheet" type="text/css" />
   </head>
 
@@ -19,9 +21,17 @@
       <div class="mt-5">
         <label for="pixlInput">
           <input type="file" class="inputbtn hide" id="pixlInput">
-          <button id="uploadBtn">Upload</button>
+          <button class="btn" id="uploadBtn">Upload</button>
         </label>
-        <button id="mintBtn">Mint</button>
+        <button class="btn" id="mintBtn">Mint</button>
+        <div class="colorpalette">
+          <div class="text">
+            <button class="btn" id="changepalette">Select palette</button>
+            <select name="paletteselector" id="paletteselector"></select>
+          </div>
+          <div class="icons" id="palettecolor">
+          </div>
+        </div>
       </div>
       <div class="result mt-5">
         <div class="selectedBlock">
@@ -31,6 +41,7 @@
         <div id="pixelImgs"></div>
       </div>
       <canvas id="pixelitcanvas"></canvas>
+      <img id="sourceFile" class="hide" />
     </div>
     <div id="loading">
       <img src="./public/images/loading.gif" />

@@ -1,14 +1,14 @@
-import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js";
+import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret, PaletteList } from "./data.js";
 
 (function() {
   let loginAddress = localStorage.getItem("loginAddress");
   let imagePath;
   let blockSize = 0;
+  let palette = 0;
   const TargetChain = {
     id: "80001",
     name: "mumbai"
   };
-  const palette = "[0,0,0]";
   const baseUrl = "https://gateway.pinata.cloud/ipfs/";
 
   const provider = new ethers.providers.Web3Provider(web3.currentProvider);
@@ -29,7 +29,7 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
     }
   }
 
-  const toggleAddress = function() {
+  const toggleAddress = () => {
     if(loginAddress) {
         $("#login_address").text(loginAddress).show();
         $("#loginBtn").hide();
@@ -93,7 +93,7 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
   const mint = async function() {
     try {
       const pixelWithSigner = PixelContract.connect(signer);
-      const tx = await pixelWithSigner.mint(imagePath, blockSize.toString(), palette);
+      const tx = await pixelWithSigner.mint(imagePath, blockSize.toString(), PaletteList[palette].toString());
       console.log("sending tx, ", tx);
       await tx.wait();
       console.log("received tx ", tx);
@@ -105,12 +105,125 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
     }
   }
 
+  const colorSim = function(rgbColor, compareColor) {
+    let i;
+    let max;
+    let d = 0;
+    for (i = 0, max = rgbColor.length; i < max; i++) {
+      d += (rgbColor[i] - compareColor[i]) * (rgbColor[i] - compareColor[i]);
+    }
+    return Math.sqrt(d);
+  }
+
+  const similarColor = function(actualColor) {
+    let selectedColor = [];
+    let currentSim = colorSim(actualColor, PaletteList[palette][0]);
+    let nextColor;
+    PaletteList[palette].forEach((color) => {
+      nextColor = colorSim(actualColor, color);
+      if (nextColor <= currentSim) {
+        selectedColor = color;
+        currentSim = nextColor;
+      }
+    });
+    return selectedColor;
+  }
+
+  const makePaletteGradient = () => {
+    //create palette
+    let pdivs = "";
+    //create palette of colors
+    document.querySelector("#palettecolor").innerHTML = "";
+    PaletteList.forEach((palette, i) => {
+      const option = document.createElement("option");
+      option.value = i;
+      palette.forEach((elem) => {
+        let div = document.createElement("div");
+        div.classList = "colorblock";
+        div.style.backgroundColor = `rgba(${elem[0]},${elem[1]},${elem[2]},1)`;
+        option.appendChild(div);
+      });
+      document.getElementById("paletteselector").appendChild(option);
+    });
+  };
+
+  const generatePixel = (file) => {
+    const c = $("#pixelitcanvas")[0];
+    const ctx = c.getContext('2d');
+    let img = new Image()
+
+    img.onload = function () {
+      const w = img.width;
+      const h = img.height;
+      c.width = w;
+      c.height = h;
+      ctx.drawImage(img, 0, 0);
+
+      let pixelArr = ctx.getImageData(0, 0, w, h).data;
+
+      for (let z = 1; z < 4; z++) {
+        let size = 20 * z * 0.2;
+        for (let y = 0; y < h; y += size) {
+          for (let x = 0; x < w; x += size) {
+            let p = (x + (y*w)) * 4;
+            ctx.fillStyle = "rgba(" + pixelArr[p] + "," + pixelArr[p + 1] + "," + pixelArr[p + 2] + "," + pixelArr[p + 3] + ")";
+            ctx.fillRect(x, y, size, size);
+          }
+        }
+
+        if (palette > 0) {
+          var imgPixels = ctx.getImageData(0, 0, w, h);
+          for (var y = 0; y < imgPixels.height; y++) {
+            for (var x = 0; x < imgPixels.width; x++) {
+              var i = y * 4 * imgPixels.width + x * 4;
+              const finalcolor = similarColor([
+                imgPixels.data[i],
+                imgPixels.data[i + 1],
+                imgPixels.data[i + 2],
+              ]);
+              imgPixels.data[i] = finalcolor[0];
+              imgPixels.data[i + 1] = finalcolor[1];
+              imgPixels.data[i + 2] = finalcolor[2];
+            }
+          }
+          ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+        }
+
+        $("#pixelImgs").append(`<div class="pixelImg" data-size="${size}"><img src="${c.toDataURL('image/png')}" width="200" /></div>`);
+      }
+
+      c.style.visibility = "hidden";
+      c.style.height = 0;
+
+    };
+
+    typeof file == "string" ? img.src = file : img.src = URL.createObjectURL(file);
+  }
+
+  const reset = () => {
+    $(".pixelImg").remove();
+    $(".selectedBlock").hide();
+    $("#loading").hide();
+    palette = 0;
+    blockSize = 0;
+  }
+
+  new SlimSelect({
+    hideSelectedOption: true,
+    showSearch: false,
+    select: "#paletteselector",
+    onChange: (info) => {
+      reset();
+      palette = info.value;
+      generatePixel($("#sourceFile").attr("src"));
+    },
+  });
+
   if (window.ethereum) {
     checkChainId();
     toggleAddress();
-    $("#loading").hide();
-    $(".pixelImg").remove();
-    $(".selectedBlock").hide();
+    makePaletteGradient();
+    reset();
 
     $("#loginBtn").on("click", function() {
       checkLogin();
@@ -121,40 +234,10 @@ import { PixelAddress, PixelABI, PinataApiKey, PinataApiSecret } from "./data.js
     })
 
     $("#pixlInput").on("change", function() {
-      $(".pixelImg").remove();
-      $(".selectedBlock").hide();
-      let img = new Image()
-      const c = $("#pixelitcanvas")[0];
-      const ctx = c.getContext('2d');
-
-      img.onload = function () {
-        const w = img.width;
-        const h = img.height;
-        c.width = w;
-        c.height = h;
-        ctx.drawImage(img, 0, 0);
-
-        let pixelArr = ctx.getImageData(0, 0, w, h).data;
-
-        for (let z = 1; z < 4; z++) {
-          let size = 20 * z * 0.2;
-          for (let y = 0; y < h; y += size) {
-            for (let x = 0; x < w; x += size) {
-              let p = (x + (y*w)) * 4;
-              ctx.fillStyle = "rgba(" + pixelArr[p] + "," + pixelArr[p + 1] + "," + pixelArr[p + 2] + "," + pixelArr[p + 3] + ")";
-              ctx.fillRect(x, y, size, size);
-            }
-          }
-
-          $("#pixelImgs").append(`<div class="pixelImg" data-size="${size}"><img src="${c.toDataURL('image/png')}" width="200" /></div>`);
-        }
-
-        c.style.visibility = "hidden";
-        c.style.height = 0;
-
-      };
-
-      img.src = URL.createObjectURL($(this).prop("files")[0]);
+      reset();
+      let file = $(this).prop("files")[0];
+      $("#sourceFile").attr("src", URL.createObjectURL(file));
+      generatePixel(file);
     })
 
     $("#root").on("click", ".pixelImg", function() {
